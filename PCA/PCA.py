@@ -9,6 +9,7 @@ from numpy.typing import NDArray
 
 # -----------------------------------------------------------------------------
 
+
 def load_countries(file_path: str) -> Tuple[List[str], List[str], NDArray]:
     country_data = []
     countries = []
@@ -104,6 +105,46 @@ def create_original_vs_standardized_boxplots(
 
     plt.savefig("standardized_data_boxplot.png")
 
+
+def create_pca_biplot(
+    pca_result: NDArray, pca: PCA, countries: List[str], variables: List[str]
+):
+    pc1 = pca_result[:, 0]
+
+    # Pesos
+    pc1_loadings = pca.components_[0, :]
+
+    plt.figure(figsize=(10, 6))
+    plt.scatter(pc1, np.zeros_like(pc1), marker="o", label="PC1 Scores", color="blue")
+
+    # Plot the variable loadings as vectors
+    y_offset = 0.02
+    for i, (loading, variable) in enumerate(zip(pc1_loadings, variables)):
+        plt.arrow(0, y_offset * (i + 1), loading, 0, color="red", alpha=0.7)
+
+        text_x = loading + 0.02 if loading > 0 else loading - 0.09 * len(variable)
+
+        plt.text(text_x, y_offset * (i + 1), variable, fontsize=12, color="red")
+
+    for i, score in enumerate(pc1):
+        plt.annotate(
+            countries[i],
+            (score, 0),
+            xytext=(0, -70),
+            textcoords="offset points",
+            fontsize=8,
+            ha="right",
+            rotation=90,
+        )
+
+    plt.xlabel("PC1 Scores")
+    plt.ylim(-0.05, 0.2)
+    plt.legend()
+    plt.grid()
+    plt.title("Biplot: PC1 Scores and Variable Loadings")
+    plt.savefig("biplot.png")
+
+
 # -----------------------------------------------------------------------------
 
 # Load data
@@ -119,7 +160,8 @@ scaled_data = scaler.transform(country_data)
 create_original_vs_standardized_boxplots(country_data, scaled_data, variables)
 
 
-# TODO check numero de componentes
-pca = PCA(n_components=7)
+pca = PCA(n_components=1)
 pca.fit(scaled_data)
 x = pca.transform(scaled_data)
+
+create_pca_biplot(x, pca, country_names, variables)
