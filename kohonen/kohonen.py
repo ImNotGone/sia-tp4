@@ -2,10 +2,10 @@ from typing import Callable, Tuple
 import numpy as np
 from numpy.typing import NDArray
 
-from kohonen.eta import EtaFunction
-from kohonen.initial_weights import InitialWeightsFunction
-from kohonen.radius import RadiusFunction
-from kohonen.distance import DistanceFunction
+from eta import EtaFunction
+from initial_weights import InitialWeightsFunction
+from radius import RadiusFunction
+from distance import DistanceFunction
 
 
 def train_kohonen(
@@ -16,7 +16,7 @@ def train_kohonen(
     get_distance: DistanceFunction,
     max_epochs: int,
     dataset: NDArray,
-):
+) -> NDArray:
     # K x K matrix of weights
     weights = get_initial_weights(som_dimension, dataset)
 
@@ -29,6 +29,8 @@ def train_kohonen(
         eta = get_eta(epoch)
 
         _update_weights(weights, selected_input, winner_pos, neighbour_radius, eta)
+
+    return weights
 
 
 def get_winner_pos(

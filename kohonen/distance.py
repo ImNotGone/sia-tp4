@@ -11,7 +11,7 @@ def _exponential_distance(x: NDArray, y: NDArray) -> float:
 DistanceFunction = Callable[[NDArray, NDArray], float]
 
 def get_distance_function(config: Dict[str, Any]) -> DistanceFunction:
-    distance_type = config["distance_type"]
+    distance_type = config["distance"]
 
     if distance_type == "euclidean":
         return _euclidean_distance

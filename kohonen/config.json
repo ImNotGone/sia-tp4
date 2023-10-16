@@ -1,0 +1,10 @@
+{
+  "k": 4,
+  "max_epochs_multiplier": 1000,
+  "initial_weights": "input",
+  "radius_type": "constant",
+  "radius": 2,
+  "eta_type": "constant",
+  "eta": 0.1,
+  "distance": "euclidean"
+}

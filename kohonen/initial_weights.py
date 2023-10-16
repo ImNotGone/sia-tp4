@@ -30,11 +30,11 @@ def _random_weights_from_input(som_dimension: int, dataset: NDArray) -> NDArray:
 InitialWeightsFunction = Callable[[int, NDArray], NDArray]
 
 def get_initial_weights_function(config: Dict[str, Any]) -> InitialWeightsFunction:
-    initial_weights_type = config["initial_weights_type"]
+    initial_weights_type = config["initial_weights"]
 
     if initial_weights_type == "random":
         return _random_weigths
-    elif initial_weights_type == "random_from_input":
+    elif initial_weights_type == "input":
         return _random_weights_from_input
 
     raise ValueError(f"Unknown initial weights type: {initial_weights_type}")
