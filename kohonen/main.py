@@ -4,6 +4,11 @@ from distance import get_distance_function
 from eta import get_eta_function
 
 from initial_weights import get_initial_weights_function
+from draw import (
+    create_neuron_activations_heatmap,
+    create_unified_distance_matrix,
+    create_average_values_heatmaps,
+)
 from radius import get_radius_function
 
 from kohonen import train_kohonen, get_winner_pos
@@ -37,21 +42,15 @@ def main():
             dataset,
         )
 
-        # Count how many times each country was assigned to each neuron in a matrix
-        # of size K x K
-        neuron_assignments = [
-            [0 for _ in range(som_dimension)] for _ in range(som_dimension)
-        ]
+        create_neuron_activations_heatmap(
+            dataset, trained_kohonen_weights, distance_function
+        )
+        create_average_values_heatmaps(
+            trained_kohonen_weights, variable_labels, dataset, distance_function
+        )
 
-        for country in dataset:
-            winner_pos = get_winner_pos(
-                country, trained_kohonen_weights, distance_function
-            )
-            neuron_assignments[winner_pos[0]][winner_pos[1]] += 1
-
-        print("Neuron assignments:")
-        for row in neuron_assignments:
-            print(row)
+        radius = radius_function(max_epochs)
+        create_unified_distance_matrix(trained_kohonen_weights, radius)
 
 
 if __name__ == "__main__":
