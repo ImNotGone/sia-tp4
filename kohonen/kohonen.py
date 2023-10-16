@@ -56,8 +56,15 @@ def _update_weights(
     neighbour_radius: float,
     eta: float,
 ):
-    for i in range(len(weights)):
-        for j in range(len(weights[i])):
+    winner_row, winner_col = winner_pos
+
+    start_row = max(0, int(winner_row - neighbour_radius))
+    end_row = min(len(weights), int(winner_row + neighbour_radius + 1))
+    start_col = max(0, int(winner_col - neighbour_radius))
+    end_col = min(len(weights[0]), int(winner_col + neighbour_radius + 1))
+
+    for i in range(start_row, end_row):
+        for j in range(start_col, end_col):
             distance = np.linalg.norm(np.array(winner_pos) - np.array([i, j]))
 
             if distance <= neighbour_radius:
