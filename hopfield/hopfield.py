@@ -5,11 +5,11 @@ from numpy.typing import NDArray
 
 
 class Hopfield:
-    def __init__(self, patterns: list[list[int]]):
+    def __init__(self, patterns: NDArray):
         # ya vienen en lista
         # si fuese [[-1, 1], [1, 1]]
         # aca recibo [-1, 1, 1, 1]
-        self._patterns = np.array(patterns)
+        self._patterns = patterns
         self._weigths = self.create_weight_matrix()
 
     def create_weight_matrix(self) -> NDArray:
@@ -37,7 +37,7 @@ class Hopfield:
         energy_eta = []
         energy_eta.append(self.calculate_energy(output))
 
-        while(i < limit):
+        while(i < limit and not output.all(prev)):
             prev = output
             # @ para multiplicar matrices
             # TODO: revisar lo del 0
