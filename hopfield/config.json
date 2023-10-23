@@ -1,6 +1,7 @@
 {
     "limit": 100,
-    "noise_percentage": 0.4,
+    "noise_percentage": 0.1,
     "display_steps": false,
-    "display_energy": true
+    "display_energy": true,
+    "selected_pattern": ["A", "G", "J", "Z"]
 }

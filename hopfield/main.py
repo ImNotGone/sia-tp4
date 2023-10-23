@@ -13,12 +13,10 @@ def main():
     with open("config.json", 'r') as f:
         config = json.load(f)
 
-    # TODO: move this to config
     # NOTA: Siguiendo lo que vimos en clase
     # de utilizar aproximadamente el 15% de los patrones
     # como hay 26 letras, 15% de 26 = 3.9 ~= 4
-    selected_letters = ["A", "G", "J", "Z"]
-
+    selected_letters = config['selected_pattern']
 
     print(f"Using: {selected_letters}")
 
@@ -41,7 +39,7 @@ def main():
 
     pattern = noisify_pattern(patterns[0], noise_percentage)
 
-    #print_letter(pattern)
+    # print_letter(pattern)
 
     pattern, energy, patterns = hopfield.calculate_output(np.array(pattern), limit)
 
