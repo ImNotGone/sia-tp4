@@ -1,0 +1,6 @@
+{
+    "limit": 100,
+    "noise_percentage": 0.4,
+    "display_steps": false,
+    "display_energy": true
+}

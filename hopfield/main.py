@@ -8,6 +8,9 @@ def main():
     with open("letters.json", 'r') as f:
         letters = json.load(f)
 
+    with open("config.json", 'r') as f:
+        config = json.load(f)
+
     # TODO: move this to config
     # NOTA: Siguiendo lo que vimos en clase
     # de utilizar aproximadamente el 15% de los patrones
@@ -25,9 +28,8 @@ def main():
 
     patterns = np.array(patterns)
 
-    # TODO: move to conf
-    noise_percentage = 0.4
-    limit = 100
+    noise_percentage = config["noise_percentage"]
+    limit = config["limit"]
 
     hopfield = Hopfield(patterns)
 
@@ -43,7 +45,10 @@ def main():
 
     print(pattern, energy, len(energy))
 
-    display_steps(patterns)
+    if (config["display_steps"]):
+        display_steps(patterns)
+    if (config["display_energy"]):
+        display_energy(energy)
 
     return 0
 
@@ -75,8 +80,19 @@ def print_letter(pattern):
             print(line)
             line = []
 
+# muestra como cambia la energia en funcion de las epocas
+def display_energy(energy: NDArray):
+    epochs = np.arange(len(energy))
+
+    plt.plot(epochs, energy, marker='o', linestyle='-', color='b')
+    plt.title("Energy vs. Epochs")
+    plt.xlabel("Epochs")
+    plt.ylabel("Energy")
+    plt.grid(True)
+    plt.show()
+
 # muestra los pasos en matrices de 5x5
-def display_steps(patterns):
+def display_steps(patterns: NDArray):
     num_patterns = len(patterns)
     cols = int(np.ceil(np.sqrt(num_patterns)))
     rows = int(np.ceil(num_patterns / cols))
