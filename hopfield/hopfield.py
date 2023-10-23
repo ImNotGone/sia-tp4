@@ -37,13 +37,17 @@ class Hopfield:
         energy_eta = []
         energy_eta.append(self.calculate_energy(output))
 
-        while(i < limit and not output.all(prev)):
-            prev = output
+        while(i < limit):
+            prev = np.copy(output)
             # @ para multiplicar matrices
             # TODO: revisar lo del 0
             output = np.sign(self._weigths @ prev)
+
             energy_eta.append(self.calculate_energy(output))
             i += 1
+
+            if(np.array_equal(output, prev)):
+                break
 
         return output, np.array(energy_eta)
 
