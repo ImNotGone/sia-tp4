@@ -26,30 +26,30 @@ class Hopfield:
         return weigths
 
 
-    def calculate_output(self, input: NDArray) -> Tuple[NDArray, NDArray]:
-        # TODO: hacer limit parametro?
-        limit = 100
+    def calculate_output(self, input: NDArray, limit: int) -> Tuple[NDArray, NDArray, NDArray]:
         i = 0
 
         prev = None
         output = input
 
-        energy_eta = []
-        energy_eta.append(self.calculate_energy(output))
+        energy_eta = [self.calculate_energy(output)]
+        patterns = [np.copy(output)]
 
         while(i < limit):
-            prev = np.copy(output)
+            prev = patterns[i]
             # @ para multiplicar matrices
-            # TODO: revisar lo del 0
+
             output = np.sign(self._weigths @ prev)
+            output = np.where(output == 0, prev, output)
 
             energy_eta.append(self.calculate_energy(output))
+            patterns.append(np.copy(output))
             i += 1
 
             if(np.array_equal(output, prev)):
                 break
 
-        return output, np.array(energy_eta)
+        return output, np.array(energy_eta), np.array(patterns)
 
     # TODO: ver si es mas rapido hacer esto o usar la matriz entera
     # y multiplicaciones con numpy
