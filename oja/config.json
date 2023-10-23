@@ -1,0 +1,5 @@
+{
+    "function": "identity",
+    "learning": 0.0001,
+    "epochs": 1000
+}
