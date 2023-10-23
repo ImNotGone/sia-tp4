@@ -35,15 +35,15 @@ def main():
 
     pattern = noisify_pattern(patterns[0], noise_percentage)
 
-    print_letter(pattern)
+    #print_letter(pattern)
 
     pattern, energy, patterns = hopfield.calculate_output(np.array(pattern), limit)
 
-    print_letter(pattern)
+    #print_letter(pattern)
 
     print(hopfield.is_spurious(pattern))
-
-    print(pattern, energy, len(energy))
+    print_letter(pattern)
+    print(energy, len(energy))
 
     if (config["display_steps"]):
         display_steps(patterns)
@@ -69,16 +69,17 @@ def generate_orthogonal_patterns(patterns: NDArray) -> NDArray:
 
 def print_letter(pattern):
     i = 0
-    line = []
+    line = "["
     for value in pattern:
         if(value == 1):
-            line += ['#']
+            line += '#'
         else:
-            line += [' ']
+            line += ' '
         i+=1
         if (i%5==0):
-            print(line)
-            line = []
+            print(line + "]")
+            line = "["
+    print()
 
 # muestra como cambia la energia en funcion de las epocas
 def display_energy(energy: NDArray):
