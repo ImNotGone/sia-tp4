@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 from kohonen import get_winner_pos
@@ -37,6 +37,69 @@ def create_neuron_activations_heatmap(
     plt.yticks([])
     plt.xticks([])
     plt.savefig("neuron_activations.png")  # Save the figure
+    plt.close()
+
+
+def create_neuron_activations_heatmap_with_labels(
+    dataset: NDArray,
+    trained_kohonen_weights: NDArray,
+    distance_function: DistanceFunction,
+    labels: List[str],
+):
+    # Count how many times each country was assigned to each neuron in a matrix
+    som_dimension = len(trained_kohonen_weights)
+    neuron_activations = [
+        [[] for _ in range(som_dimension)] for _ in range(som_dimension)
+    ]
+    for country_name, country_data in zip(labels, dataset):
+        winner_pos = get_winner_pos(
+            country_data, trained_kohonen_weights, distance_function
+        )
+        neuron_activations[winner_pos[0]][winner_pos[1]].append(country_name)
+
+    # Create a heatmap
+    neuron_activations_number = [
+        [len(neuron_activations[i][j]) for j in range(som_dimension)]
+        for i in range(som_dimension)
+    ]
+    plt.figure(figsize=(8, 6))  # Set the figure size
+    im = plt.imshow(
+        neuron_activations_number, cmap="plasma", interpolation="nearest", aspect="auto"
+    )
+
+    # Add black lines between cells
+    for i in range(som_dimension + 1):
+        plt.axhline(y=i - 0.5, color="black", linewidth=1.5)
+        plt.axvline(x=i - 0.5, color="black", linewidth=1.5)
+
+    plt.colorbar(im)  # Add a colorbar to the plot
+    plt.title("Neuron Activations")  # Set the title
+    plt.yticks([])
+    plt.xticks([])
+
+    # Add labels for each neuron
+    for i in range(som_dimension):
+        for j in range(som_dimension):
+            num_labels = len(neuron_activations[i][j])
+            if num_labels == 0:
+                continue
+
+            label_height =  0.5 / num_labels
+            for z, country_name in enumerate(neuron_activations[i][j]):
+                # Add a label for each country assigned to the neuron
+                # Spread the labels out vertically
+
+                plt.text(
+                    j,
+                    i + z * label_height,
+                    country_name,
+                    ha="center",
+                    va="center",
+                    fontsize=5,
+                    color="black",
+                )
+
+    plt.savefig("neuron_activations_with_labels.png")  # Save the figure
     plt.close()
 
 
@@ -121,7 +184,6 @@ def create_average_values_heatmaps(
     ]
     for i in range(som_dimension):
         for j in range(som_dimension):
-
             if neuron_activations[i][j][1] == 0:
                 continue
 
