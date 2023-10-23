@@ -60,3 +60,8 @@ class Hopfield:
                 energy -= self._weigths[i][j] * pattern[i] * pattern[j]
         return energy
 
+    def is_spurious(self, input: NDArray) -> bool:
+        for pattern in self._patterns:
+            if np.array_equal(input, pattern):
+                return False
+        return True
