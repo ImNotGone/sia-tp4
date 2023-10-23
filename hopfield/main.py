@@ -1,4 +1,6 @@
 import json
+from typing import Dict
+import itertools
 import numpy as np
 from hopfield import Hopfield, NDArray
 import matplotlib.pyplot as plt
@@ -17,14 +19,17 @@ def main():
     # como hay 26 letras, 15% de 26 = 3.9 ~= 4
     selected_letters = ["A", "G", "J", "Z"]
 
+    print(f"Using: {selected_letters}")
+
+    for key, value in letters.items():
+        letters[key] = np.reshape(value, 25)
+
+    combination_values = generate_orthogonal_patterns(letters, 4)
+    # print(combination_values)
+
     patterns = []
     for letter in selected_letters:
-        mat = letters[letter]
-        pattern = []
-        for row in mat:
-            for value in row:
-                pattern += [value]
-        patterns += [pattern]
+        patterns += [letters[letter]]
 
     patterns = np.array(patterns)
 
@@ -41,7 +46,7 @@ def main():
 
     #print_letter(pattern)
 
-    print(hopfield.is_spurious(pattern))
+    print(f"Is spurious: {hopfield.is_spurious(pattern)}")
     print_letter(pattern)
     print(energy, len(energy))
 
@@ -63,9 +68,46 @@ def noisify_pattern(pattern: NDArray, noise_percentage: float) -> NDArray:
     pattern[index_to_flip] *= -1
     return pattern
 
-# TODO: implementar esto
-def generate_orthogonal_patterns(patterns: NDArray) -> NDArray:
-    pass
+def generate_orthogonal_patterns(letters: Dict[int, NDArray], qty_per_group: int):
+    combinations = itertools.combinations(letters.keys(), qty_per_group)
+
+    # TODO: podria usarlo para no tener q calcular el dot en todos
+    # sino usar la mat y es O[1] (obviamente sin contar q tengo q hacer la mat primero)
+    # mat = calculate_orthogonality_matrix(letters.values())
+
+    output = []
+
+    for combination in combinations:
+        k = 0
+        ortogonality = 0
+        for i in range(qty_per_group):
+            for j in range(i+1, qty_per_group):
+                normalized_dot_prod = np.dot(letters[combination[i]], letters[combination[j]])/len(letters[combination[i]])
+                ortogonality += abs(normalized_dot_prod)
+                k += 1
+        normalized_ortogonality = ortogonality / (k)
+        output += [[list(combination), normalized_ortogonality]]
+
+    output.sort(key=lambda x:x[1], reverse=True)
+
+    return output
+
+# calcula la matriz de ortogonalidad para todos los valores entre si
+def calculate_orthogonality_matrix(patterns):
+    num_patterns = len(patterns)
+    orthogonality_matrix = np.zeros((num_patterns, num_patterns))
+
+    for i in range(num_patterns):
+        for j in range(i, num_patterns):
+            pattern1 = patterns[i]
+            pattern2 = patterns[j]
+            dot_product = np.dot(pattern1, pattern2)
+            orthogonality = dot_product / len(pattern1)
+            orthogonality_matrix[i, j] = orthogonality
+            orthogonality_matrix[j, i] = orthogonality
+
+    return orthogonality_matrix
+
 
 def print_letter(pattern):
     i = 0
