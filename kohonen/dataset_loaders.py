@@ -21,8 +21,4 @@ def load_countries(file_path: str) -> Tuple[List[str], List[str], NDArray]:
 
     dataset = np.array(country_data)
 
-    # Normalize the dataset, Unit length normalization
-    for i in range(len(dataset)):
-        dataset[i] = dataset[i] / np.linalg.norm(dataset[i])
-
     return countries, variables, dataset

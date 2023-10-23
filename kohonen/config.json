@@ -1,10 +1,11 @@
 {
-  "k": 4,
-  "max_epochs_multiplier": 1000,
+  "k": 3,
+  "max_epochs_multiplier": 10000,
+  "standardizer": "z_score",
   "initial_weights": "input",
-  "radius_type": "constant",
-  "radius": 2,
-  "eta_type": "constant",
+  "radius_type": "linear",
+  "radius": 3,
+  "eta_type": "linear",
   "eta": 0.1,
   "distance": "euclidean"
 }

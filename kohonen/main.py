@@ -6,9 +6,11 @@ from eta import get_eta_function
 from initial_weights import get_initial_weights_function
 from draw import (
     create_neuron_activations_heatmap,
+    create_neuron_activations_heatmap_with_labels,
     create_unified_distance_matrix,
     create_average_values_heatmaps,
 )
+from standardizers import get_standardizer
 from radius import get_radius_function
 
 from kohonen import train_kohonen, get_winner_pos
@@ -30,6 +32,9 @@ def main():
 
         input_labels, variable_labels, dataset = load_countries("../data/europe.csv")
 
+        standardizer = get_standardizer(config)
+        dataset = standardizer(dataset)
+
         max_epochs = max_epochs_multiplier * len(variable_labels)
 
         trained_kohonen_weights = train_kohonen(
@@ -45,12 +50,27 @@ def main():
         create_neuron_activations_heatmap(
             dataset, trained_kohonen_weights, distance_function
         )
+
+        create_neuron_activations_heatmap_with_labels(
+            dataset, trained_kohonen_weights, distance_function, input_labels
+        )
+
         create_average_values_heatmaps(
             trained_kohonen_weights, variable_labels, dataset, distance_function
         )
 
         radius = radius_function(max_epochs)
         create_unified_distance_matrix(trained_kohonen_weights, radius)
+
+        # print distances from each input to each winner neuron
+        for i, country in enumerate(input_labels):
+            winner_pos = get_winner_pos(
+                dataset[i], trained_kohonen_weights, distance_function
+            )
+            print(f"Input {country} winner pos: {winner_pos}")
+
+            distances = distance_function(dataset[i], trained_kohonen_weights[winner_pos])
+            print(f"Input {country} distances: {distances}")
 
 
 if __name__ == "__main__":
