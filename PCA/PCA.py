@@ -106,7 +106,7 @@ def create_original_vs_standardized_boxplots(
     plt.savefig("standardized_data_boxplot.png")
 
 
-def create_pca_biplot(
+def create_first_component_biplot(
     pca_result: NDArray, pca: PCA, countries: List[str], variables: List[str]
 ):
     pc1 = pca_result[:, 0]
@@ -142,7 +142,56 @@ def create_pca_biplot(
     plt.legend()
     plt.grid()
     plt.title("Biplot: PC1 Scores and Variable Loadings")
-    plt.savefig("biplot.png")
+    plt.savefig("first_component_biplot.png")
+
+
+def create_first_second_component_biplot(
+    pca_result: NDArray, pca: PCA, countries: List[str], variables: List[str]
+):
+    pc1 = pca_result[:, 0]
+    pc2 = pca_result[:, 1]
+
+    # Set the colors
+    variable_colors = ["b", "g", "r", "c", "m", "y", "k"]
+
+    # Pesos
+    pc1_loadings = pca.components_[0, :]
+    pc2_loadings = pca.components_[1, :]
+
+    plt.figure(figsize=(10, 6))
+    plt.grid()
+    plt.scatter(pc1, pc2, marker="o", label="PCA Scores", color="blue")
+
+    # Plot the variable loadings as vectors
+    for pc1_loading, pc2_loading, variable, color in zip(
+        pc1_loadings, pc2_loadings, variables, variable_colors
+    ):
+        plt.arrow(0, 0, pc1_loading, pc2_loading, color=color, alpha=0.7)
+
+        text_x = (
+            pc1_loading + 0.02
+            if pc1_loading > 0
+            else pc1_loading - 0.09 * len(variable)
+        )
+        text_y = pc2_loading + 0.02
+
+        plt.text(text_x, text_y, variable, fontsize=12, color=color)
+
+    for i, (score1, score2) in enumerate(zip(pc1, pc2)):
+        plt.annotate(
+            countries[i],
+            (score1, score2),
+            xytext=(25, -10),
+            textcoords="offset points",
+            fontsize=8,
+            ha="right",
+        )
+
+    plt.xlabel("PC1 Scores")
+    plt.ylabel("PC2 Scores")
+    plt.legend()
+    plt.title("Biplot: PC1, PC2 Scores and Variable Loadings")
+    plt.savefig("first_second_component_biplot.png")
 
 
 # -----------------------------------------------------------------------------
@@ -160,8 +209,9 @@ scaled_data = scaler.transform(country_data)
 create_original_vs_standardized_boxplots(country_data, scaled_data, variables)
 
 
-pca = PCA(n_components=1)
+pca = PCA(n_components=2)
 pca.fit(scaled_data)
 x = pca.transform(scaled_data)
 
-create_pca_biplot(x, pca, country_names, variables)
+create_first_component_biplot(x, pca, country_names, variables)
+create_first_second_component_biplot(x, pca, country_names, variables)
