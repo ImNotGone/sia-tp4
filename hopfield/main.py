@@ -19,13 +19,14 @@ def main():
     # como hay 26 letras, 15% de 26 = 3.9 ~= 4
     selected_letters = ["A", "G", "J", "Z"]
 
+
     print(f"Using: {selected_letters}")
 
     for key, value in letters.items():
         letters[key] = np.reshape(value, 25)
 
     combination_values = generate_orthogonal_patterns(letters, 4)
-    # print(combination_values)
+    print(combination_values)
 
     patterns = []
     for letter in selected_letters:
@@ -80,15 +81,24 @@ def generate_orthogonal_patterns(letters: Dict[int, NDArray], qty_per_group: int
     for combination in combinations:
         k = 0
         ortogonality = 0
+        max = 0
+        qty = 0
         for i in range(qty_per_group):
             for j in range(i+1, qty_per_group):
-                normalized_dot_prod = np.dot(letters[combination[i]], letters[combination[j]])/len(letters[combination[i]])
-                ortogonality += abs(normalized_dot_prod)
+                normalized_dot_prod = np.dot(letters[combination[i]], letters[combination[j]])
+                normalized_dot_prod = abs(normalized_dot_prod)
+                ortogonality += normalized_dot_prod
                 k += 1
+                if max < normalized_dot_prod:
+                    max = normalized_dot_prod
+                    qty = 1
+                elif max == normalized_dot_prod:
+                    qty += 1
         normalized_ortogonality = ortogonality / (k)
-        output += [[list(combination), normalized_ortogonality]]
+        output += [[list(combination), normalized_ortogonality, max, qty]]
 
-    output.sort(key=lambda x:x[1], reverse=True)
+    # ordenar x maximo, despues x cantidad de maximos y por ultimo x normalized_ortogonality
+    output.sort(key=lambda entry: (entry[2], entry[3], entry[1]), reverse=True)
 
     return output
 
