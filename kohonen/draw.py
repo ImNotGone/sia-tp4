@@ -1,6 +1,7 @@
-from typing import List, Tuple
+from typing import List, Dict
 import matplotlib.pyplot as plt
 import numpy as np
+import csv
 from kohonen import get_winner_pos
 from numpy.typing import NDArray
 
@@ -23,9 +24,7 @@ def create_neuron_activations_heatmap(
 
     # Create a heatmap
     plt.figure(figsize=(8, 6))  # Set the figure size
-    plt.imshow(
-        neuron_activations, cmap="plasma", interpolation="nearest", aspect="auto"
-    )
+    plt.imshow(neuron_activations, cmap="Blues", interpolation="nearest", aspect="auto")
 
     # Add black lines between cells
     for i in range(som_dimension + 1):
@@ -33,6 +32,7 @@ def create_neuron_activations_heatmap(
         plt.axvline(x=i - 0.5, color="black", linewidth=1.5)
 
     plt.colorbar()  # Add a colorbar to the plot
+    plt.clim(0, np.max(neuron_activations))
     plt.title("Neuron Activations")  # Set the title
     plt.yticks([])
     plt.xticks([])
@@ -64,7 +64,7 @@ def create_neuron_activations_heatmap_with_labels(
     ]
     plt.figure(figsize=(8, 6))  # Set the figure size
     im = plt.imshow(
-        neuron_activations_number, cmap="plasma", interpolation="nearest", aspect="auto"
+        neuron_activations_number, cmap="Blues", interpolation="nearest", aspect="auto"
     )
 
     # Add black lines between cells
@@ -73,6 +73,7 @@ def create_neuron_activations_heatmap_with_labels(
         plt.axvline(x=i - 0.5, color="black", linewidth=1.5)
 
     plt.colorbar(im)  # Add a colorbar to the plot
+    plt.clim(0, np.max(neuron_activations_number))
     plt.title("Neuron Activations")  # Set the title
     plt.yticks([])
     plt.xticks([])
@@ -80,24 +81,17 @@ def create_neuron_activations_heatmap_with_labels(
     # Add labels for each neuron
     for i in range(som_dimension):
         for j in range(som_dimension):
-            num_labels = len(neuron_activations[i][j])
-            if num_labels == 0:
-                continue
-
-            label_height =  0.5 / num_labels
-            for z, country_name in enumerate(neuron_activations[i][j]):
-                # Add a label for each country assigned to the neuron
-                # Spread the labels out vertically
-
-                plt.text(
-                    j,
-                    i + z * label_height,
-                    country_name,
-                    ha="center",
-                    va="center",
-                    fontsize=5,
-                    color="black",
-                )
+            string = "\n".join(neuron_activations[i][j])
+            color = "white" if neuron_activations_number[i][j] > 5 else "black"
+            plt.text(
+                j,
+                i,
+                string,
+                ha="center",
+                va="center",
+                fontsize=10,
+                color=color,
+            )
 
     plt.savefig("neuron_activations_with_labels.png")  # Save the figure
     plt.close()
@@ -141,7 +135,7 @@ def create_unified_distance_matrix(
     # Create a heatmap
     plt.figure(figsize=(8, 6))  # Set the figure size
     plt.imshow(
-        unified_distance_matrix, cmap="plasma", interpolation="nearest", aspect="auto"
+        unified_distance_matrix, cmap="Blues", interpolation="nearest", aspect="auto"
     )
 
     # Add black lines between cells
@@ -200,7 +194,7 @@ def create_average_values_heatmaps(
 
         plt.figure(figsize=(8, 6))
         plt.imshow(
-            variable_values, cmap="plasma", interpolation="nearest", aspect="auto"
+            variable_values, cmap="Blues", interpolation="nearest", aspect="auto"
         )
 
         # Add black lines between cells
@@ -214,3 +208,52 @@ def create_average_values_heatmaps(
         plt.xticks([])
         plt.savefig(f"average_{variables[variable_index]}.png")  # Save the figure
         plt.close()
+
+
+def create_k_dead_neurons_chart(csv_file_path: str):
+    with open(csv_file_path, "r") as f:
+        reader = csv.reader(f)
+        next(reader)  # Skip the header
+
+        k_values = [int(row[0]) for row in reader]
+        k_values = list(set(k_values))
+
+        f.seek(0)
+        next(reader)  # Skip the header
+
+        dead_neurons: Dict[int, List[int]] = dict.fromkeys(k_values, [])
+        for k in k_values:
+            dead_neurons[k] = []
+
+        for row in reader:
+            dead_neurons[int(row[0])].append(int(row[1]))
+
+        average_dead_neurons_as_percentages = [
+            (100 * (sum(dead_neurons[k]) / (k * k))) / len(dead_neurons[k])
+            for k in k_values
+        ]
+        std_dead_neurons_as_percentages = [
+            (100 * np.std(dead_neurons[k]) / (k * k)) for k in k_values
+        ]
+
+        plt.figure(figsize=(8, 6))
+
+        # Bar chart
+        plt.bar(
+            k_values,
+            average_dead_neurons_as_percentages,
+            yerr=std_dead_neurons_as_percentages,
+            capsize=5,
+        )
+        plt.title(
+            "Average Dead Neurons as percentage of total neurons"
+        )  # Set the title
+        plt.xticks(k_values)
+        plt.ylabel("Average Dead Neurons (%)")
+        plt.xlabel("k")
+
+        # Add percentages to the y ticks
+        plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f"{x:.0f}%"))
+
+        # Error bars
+        plt.savefig("average_dead_neurons.png")  # Save the figure

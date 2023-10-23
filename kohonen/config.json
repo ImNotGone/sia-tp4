@@ -7,5 +7,6 @@
   "radius": 3,
   "eta_type": "linear",
   "eta": 0.1,
-  "distance": "euclidean"
+  "distance": "euclidean",
+  "run_k_test": false
 }

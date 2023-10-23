@@ -1,4 +1,5 @@
 import json
+import csv
 from dataset_loaders import load_countries
 from distance import get_distance_function
 from eta import get_eta_function
@@ -9,11 +10,59 @@ from draw import (
     create_neuron_activations_heatmap_with_labels,
     create_unified_distance_matrix,
     create_average_values_heatmaps,
+    create_k_dead_neurons_chart,
 )
 from standardizers import get_standardizer
 from radius import get_radius_function
 
 from kohonen import train_kohonen, get_winner_pos
+
+
+def k_test(
+    dataset,
+    inital_weights_function,
+    radius_function,
+    eta_function,
+    distance_function,
+    max_epochs,
+):
+    min_k = 3
+    max_k = 6
+    iterations = 10
+
+    results = []
+    for k in range(min_k, max_k + 1):
+        print(f"Testing k={k}")
+        for _ in range(iterations):
+            trained_kohonen_weights = train_kohonen(
+                k,
+                inital_weights_function,
+                radius_function,
+                eta_function,
+                distance_function,
+                max_epochs,
+                dataset,
+            )
+            neuron_activations = [
+                [0 for _ in range(k)] for _ in range(k)
+            ]
+            for country in dataset:
+                winner_pos = get_winner_pos(country, trained_kohonen_weights, distance_function)
+                neuron_activations[winner_pos[0]][winner_pos[1]] += 1
+
+            dead_neurons = 0
+            for i in range(k):
+                for j in range(k):
+                    if neuron_activations[i][j] == 0:
+                        dead_neurons += 1
+
+            results.append((k, dead_neurons))
+
+    # Save to csv
+    with open("k_test.csv", "w") as f:
+        writer = csv.writer(f)
+        writer.writerow(["k", "dead_neurons"])
+        writer.writerows(results)
 
 
 def main():
@@ -62,16 +111,16 @@ def main():
         radius = radius_function(max_epochs)
         create_unified_distance_matrix(trained_kohonen_weights, radius)
 
-        # print distances from each input to each winner neuron
-        for i, country in enumerate(input_labels):
-            winner_pos = get_winner_pos(
-                dataset[i], trained_kohonen_weights, distance_function
+        if config["run_k_test"]:
+            k_test(
+                dataset,
+                inital_weights_function,
+                radius_function,
+                eta_function,
+                distance_function,
+                max_epochs,
             )
-            print(f"Input {country} winner pos: {winner_pos}")
-
-            distances = distance_function(dataset[i], trained_kohonen_weights[winner_pos])
-            print(f"Input {country} distances: {distances}")
-
+    create_k_dead_neurons_chart("k_test.csv")
 
 if __name__ == "__main__":
     main()
