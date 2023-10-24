@@ -126,3 +126,12 @@ El archivo `config.json` tiene el siguiente formato
     - _display_step_: Flag para realizar un grafico de los pasos de la red
     - _display_energy_: Flag para realizar un grafico de la funcion de energia
     - _selected_pattern_: Que patrones son elegidos para guardar en la red
+
+ 
+## Autores
+
+- [Gonzalo Martone](https://github.com/ImNotGone)
+- [Santiago Ballerini](https://github.com/Cuinardium)
+- [Franco Bosetti](https://github.com/francobosetti)
+- [Juan Cruz Bafico](https://github.com/jBafico)
+- [ Nicolás Suarez Durrels](https://github.com/nicosuarez272)
