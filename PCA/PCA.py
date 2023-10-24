@@ -106,21 +106,19 @@ def create_original_vs_standardized_boxplots(
     plt.savefig("standardized_data_boxplot.png")
 
 
-def create_first_component_barplot(
-    pca_result: NDArray,  countries: List[str]
-):
+def create_first_component_barplot(pca_result: NDArray, countries: List[str]):
     pc1 = pca_result[:, 0]
 
+    sorted_countries = [country for _, country in sorted(zip(pc1, countries))]
+    sorted_pc1 = sorted(pc1)
 
     plt.figure(figsize=(18, 14))
-    plt.bar(countries, pc1, label="PC1 Scores", color="blue")
+    plt.bar(sorted_countries, sorted_pc1, label="PC1 Scores", color="steelblue")
 
     plt.xlabel("Countries")
     plt.ylabel("PC1 Scores")
     plt.xticks(rotation=90)
-    plt.legend()
-    plt.grid()
-    plt.title("Barplot: PC1 Scores and Variable Loadings")
+    plt.title("Sorted PC1 Scores")
     plt.savefig("first_component_plot.png")
 
 
@@ -173,6 +171,64 @@ def create_first_second_component_biplot(
     plt.savefig("first_second_component_biplot.png")
 
 
+def create_first_second_component_plot_with_kohonen_groups(
+    pca_result: NDArray, countries: List[str]
+):
+    kohonen_groups_colors = [
+        (["Greece", "Spain", "United Kingdom"], "b"),
+        (["Finland", "Ireland", "Sweden", "Italy"], "g"),
+        (
+            [
+                "Germany",
+                "Iceland",
+                "Luxembourg",
+                "Netherlands",
+                "Norway",
+                "Switzerland",
+            ],
+            "r",
+        ),
+        (["Croatia", "Poland", "Portugal"], "c"),
+        (["Czech Republic", "Slovenia"], "m"),
+        (["Austria", "Belgium", "Denmark"], "y"),
+        (["Bulgaria", "Estonia", "Ukraine"], "k"),
+        (["Hungary", "Latvia", "Lithuania"], "orange"),
+        (["Slovakia"], "purple"),
+    ]
+
+    pc1 = pca_result[:, 0]
+    pc2 = pca_result[:, 1]
+
+    plt.figure(figsize=(10, 6))
+    plt.grid()
+
+    for i, (score1, score2) in enumerate(zip(pc1, pc2)):
+        plt.annotate(
+            countries[i],
+            (score1, score2),
+            xytext=(25, -10),
+            textcoords="offset points",
+            fontsize=8,
+            ha="right",
+        )
+
+    # Set colors for each group
+    for group, color in kohonen_groups_colors:
+        group_indices = [countries.index(country) for country in group]
+
+        plt.scatter(
+            pc1[group_indices],
+            pc2[group_indices],
+            marker="o",
+            color=color,
+        )
+
+    plt.xlabel("PC1 Scores")
+    plt.ylabel("PC2 Scores")
+    plt.title("PC1, PC2 Scores and Kohonen Groups")
+    plt.savefig("first_second_component_plot_with_kohonen_groups.png")
+
+
 # -----------------------------------------------------------------------------
 
 # Load data
@@ -194,3 +250,5 @@ x = pca.transform(scaled_data)
 
 create_first_component_barplot(x, country_names)
 create_first_second_component_biplot(x, pca, country_names, variables)
+
+create_first_second_component_plot_with_kohonen_groups(x, country_names)
